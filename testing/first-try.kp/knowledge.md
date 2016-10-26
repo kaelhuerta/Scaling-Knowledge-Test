@@ -1,14 +1,15 @@
 ---
-title: This is a Knowledge Template Header
+title: This is the very first trial
 authors:
-- Sally Smarts
-- Wesley Wisdom
+- (Kael Huerta)[kael.huerta@toptal.com]
 tags:
 - knowledge
 - example
+- test
+- test-tag
 created_at: 2016-06-29 00:00:00
-updated_at: 2016-10-26 12:23:34.119582
-tldr: This is short description of the content and findings of the post.
+updated_at: 2016-10-26 17:07:43.244807
+tldr: This is my very first post to try things out. Let's see how this works.
 ---
 
 _NOTE: In the TL,DR, optimize for **clarity** and **comprehensiveness**. The goal is to convey the post with the least amount of friction, especially since notebooks require much more scrolling than blog posts. Make the reader get a correct understanding of the post's takeaway, and the points supporting that takeaway without having to strain through paragraphs and tons of prose. Bullet points are great here, but are up to you. Try to avoid academic paper style abstracts._
@@ -72,5 +73,61 @@ There are some requirements around how an R Markdown is developed to make the ma
  - Do not put markdown headers in R blocks. The knitr code will interpret the header #'s as R comments. This means that they will either be rendered properly as R comments within the block, or left out entirely if echo=FALSE
 
 ### Appendix
+
+Testing a table.
+
+<table>
+<caption>This is a random and useless table for testing</caption>
+ <thead>
+  <tr>
+   <th style="text-align:right;"> id </th>
+   <th style="text-align:right;"> random </th>
+  </tr>
+ </thead>
+<tbody>
+  <tr>
+   <td style="text-align:right;"> 1 </td>
+   <td style="text-align:right;"> 0.4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 2 </td>
+   <td style="text-align:right;"> 0.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 3 </td>
+   <td style="text-align:right;"> 0.0 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 4 </td>
+   <td style="text-align:right;"> 0.6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 5 </td>
+   <td style="text-align:right;"> 0.4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 6 </td>
+   <td style="text-align:right;"> 0.6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 7 </td>
+   <td style="text-align:right;"> 0.4 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 8 </td>
+   <td style="text-align:right;"> 0.8 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 9 </td>
+   <td style="text-align:right;"> 0.6 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> 10 </td>
+   <td style="text-align:right;"> 0.6 </td>
+  </tr>
+</tbody>
+</table>
+
+Here should be a table ^
 
 Put all the stuff here that is not necessary for supporting the points above. Good place for documentation of paths not pursued without distraction.
