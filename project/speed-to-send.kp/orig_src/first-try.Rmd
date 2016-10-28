@@ -3,6 +3,7 @@ title: Speed to send first candidate
 authors:
 - Kael Huerta
 tags:
+- knowledge
 - jobs
 - matching
 - first-candidate
@@ -25,7 +26,7 @@ how the probability of cancellation starts increasing.
 
 <!-- Loading libraries  -->
 
-```{r, echo = F, message = F}
+```{r libraries, echo = F, message = F}
 ## Required libraries
 library(arm)
 library(stringr)
@@ -50,41 +51,125 @@ pal <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442",
   "#0072B2", "#D55E00", "#CC79A7", "#000000")
 ```
 
+```{r data, echo = F}
+project <- 'toptal.com:api-project-726361118046'
+pd <- src_bigquery(project, 'analytics_warehouse_prototype')
 
-_NOTE: in graphs, optimize for being able to **stand alone**. As we aggregate and put things in presentations, we want to not have to recreate and add code to each plot to make it understandable without the entire post around it. When we compare this plot to other people's from other posts, will it be understandable without several paragraphs?_
+jobs <- tbl(pd, 'jobs_csv') %>%
+  as.data.table
 
+statuses <- tbl(pd, 'statuses') %>%
+  filter(statusable_type == 'Job') %>%
+  as.data.table
 
-### Common Mistakes
+funnel <- tbl(pd, 'job_matching_funnel_dataset') %>%
+  select(job_id, job_posted_at, job_claimed_at, first_candidate_sent_at) %>%
+  as.data.table
 
-There are some requirements around how an R Markdown is developed to make the markdown render properly on the site. Here is a list of the ones that often lead to questions:
-
- - There should be one plot display call in each R block. The add_knowledge script currently gets confused if there are multiple plots in a given block:
-
-```{r }
-  ### My Header (treated as R comment, as it is in a code block)
-  library(ggplot2)
-  test_data <- data.frame(y1 = rnorm(100), y2 = runif(100), x = 1:100)
-  ggplot(test_data, aes(y = y1, x = x)) + geom_line()
-  ggplot(test_data, aes(y = y2, x = x)) + geom_line()
+actions <- tbl(pd, 'performed_actions') %>%
+  filter(subject_type == 'Job') %>%
+  as.data.table
 ```
 
- - Do not put markdown headers in R blocks. The knitr code will interpret the header #'s as R comments. This means that they will either be rendered properly as R comments within the block, or left out entirely if echo=FALSE
+```{r models, echo = F, message = F}
+## Change this to update the report
+end.date <- as.POSIXct('2016-10-24') - days(14)
 
-### Appendix
+## Let's get jobs posted from new clients (never had posted a job before)
+first.job <- jobs %>%
+  ## Filtering long shots
+  filter(!long_shot,
+    job_status %in% c('active', 'closed', 'removed')) %>%
+  select(company_id, job_created_at, job_id, job_status, engagement_id,
+    job_type) %>%
+  tbl_df() %>% ## top_n only works on tbls, no data.tables =(
+  group_by(company_id) %>%
+  arrange(company_id, job_created_at) %>%
+  top_n(n = 1, wt = job_created_at) %>%
+  data.table
 
-Testing a table.
+## Let's get the cancellation timestamp
+cancelled <- statuses %>%
+  filter(status == 'removed', is.na(ended_at)) %>%
+  select(statusable_id, created_at) %>%
+  unique %>%
+  setnames(c('job_id', 'cancelled_at'))
 
-```{r, echo = F, message = F}
-library(knitr)
-library(data.table)
-library(dplyr)
+## Jobs that got sent away or postponed AND resumed
+resumed <- actions %>%
+  filter(str_detect(action, 'resume')) %>%
+  tbl_df() %>%
+  group_by(subject_id) %>%
+  arrange(subject_id, created_at) %>%
+  top_n(n = -1, wt = created_at) %>%
+  select(subject_id, created_at) %>%
+  as.data.table %>%
+  setnames(c('job_id', 'resumed_at'))
 
-data.table(id = 1:10, random = sample(seq(0, 1, .2), 10, replace = T)) %>%
-  kable(caption = 'This is a random and useless table for testing',
-    format = 'html')
+## Removed due to sent away. This must be filtered
+sent.away <- actions %>%
+  arrange(subject_id, created_at) %>%
+  group_by(subject_id) %>%
+  mutate(from = c(NA, action[-length(action)]),
+    step = paste(from, action, sep = ' -> ')) %>%
+  filter(step == 'sent_away -> removed') %>%
+  select(subject_id, created_at, step)
+
+dataset <- first.job %>%
+  join(funnel) %>%
+  join(cancelled) %>%
+  join(resumed) %>%
+  filter(!job_id %in% sent.away$subject_id, ## Filter out the sent away
+    job_posted_at < end.date, ## Filter out the recent ones
+    job_type == 'developer', ## Only developers for now
+    is.na(first_candidate_sent_at) == !is.na(cancelled_at)) %>% ## Only
+  ## the ones cancelled in this particular step of the funnel are relevant
+  mutate(cancelled = as.factor(is.na(first_candidate_sent_at)),
+    first_candidate_sent_at = as.POSIXct(ifelse(is.na(first_candidate_sent_at),
+      cancelled_at, first_candidate_sent_at), origin = origin),
+    posted = job_posted_at,
+    claimed = as.POSIXct(ifelse(!is.na(resumed_at) &
+      resumed_at < first_candidate_sent_at,
+      resumed_at, job_claimed_at), origin = lubridate::origin),
+    claim.to.first = as.numeric(difftime(first_candidate_sent_at, claimed,
+      units = 'days')),
+    post.to.first = as.numeric(difftime(first_candidate_sent_at, job_posted_at,
+      units = 'days')),
+    daily.delay = cut(claim.to.first, right = F,
+      breaks = c(0, 1, 2, 3, 4, 5, 6, 7, 14, 31)),
+    delay = cut(claim.to.first, right = F,
+      breaks = c(0, 1, 3, 5, 7, 14, 31))) %>% 
+  mutate(cv.sample = 1:nrow(.) %% 5)
+
+## Posted to First Sent Model
+set.seed(3003)
+post.mod <- dataset %>%
+  filter(post.to.first < 31,
+    is.na(resumed_at) | resumed_at > first_candidate_sent_at) %>%
+  bayesglm(formula = cancelled ~
+      bs(post.to.first, df = 10, Boundary.knots = c(0, 31))
+    ,
+    prior.df = 1,
+    prior.scale = rep(.01, 10),
+    family = binomial(link = 'logit'))
+
+## Claimed to First Sent Model
+set.seed(3003)
+claim.mod <- dataset %>%
+  filter(claim.to.first < 31) %>%
+  bayesglm(formula = cancelled ~
+      bs(claim.to.first, df = 10, Boundary.knots = c(0, 31))
+    ,
+    prior.df = 1,
+    prior.scale = rep(.03, 10),
+    family = binomial(link = 'logit'))
+
 ```
 
-Here should be a table ^
+```{r, echo = F}
+display(post.mod, 3)
+```
 
-Put all the stuff here that is not necessary for supporting the points above. Good place for documentation of paths not pursued without distraction.
-
+```{r, echo = F}
+display(claim.mod, 3)
+```
