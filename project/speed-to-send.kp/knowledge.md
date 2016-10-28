@@ -10,7 +10,7 @@ tags:
 - glm
 - splines
 created_at: 2016-10-26 00:00:00
-updated_at: 2016-10-28 01:13:39.914704
+updated_at: 2016-10-28 01:16:09.878177
 tldr: We compare the cancellation probability of a job in terms of the time it took
   our team to send the first candidate from the time the job was posted and the time
   it was claimed. We assess if it is worth speeding up the matching process.
@@ -32,19 +32,19 @@ how the probability of cancellation starts increasing.
 
 
 ```
-## Error: oauth_listener() needs an interactive environment.
+## Error: interactive() is not TRUE
 ```
 
 ```
-## Error: oauth_listener() needs an interactive environment.
+## Error: interactive() is not TRUE
 ```
 
 ```
-## Error: oauth_listener() needs an interactive environment.
+## Error: interactive() is not TRUE
 ```
 
 ```
-## Error: oauth_listener() needs an interactive environment.
+## Error: interactive() is not TRUE
 ```
 
 
