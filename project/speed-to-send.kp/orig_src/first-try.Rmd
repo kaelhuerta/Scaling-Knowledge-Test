@@ -54,6 +54,11 @@ pal <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442",
 options('httr_oob_default' = T)
 ```
 
+```{r}
+getwd()
+```
+
+
 ```{r data, echo = F}
 # project <- 'toptal.com:api-project-726361118046'
 # pd <- src_bigquery(project, 'analytics_warehouse_prototype')

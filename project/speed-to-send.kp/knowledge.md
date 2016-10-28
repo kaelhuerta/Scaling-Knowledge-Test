@@ -10,7 +10,7 @@ tags:
 - glm
 - splines
 created_at: 2016-10-26 00:00:00
-updated_at: 2016-10-28 02:19:21.596751
+updated_at: 2016-10-28 02:20:49.045162
 tldr: We compare the cancellation probability of a job in terms of the time it took
   our team to send the first candidate from the time the job was posted and the time
   it was claimed. We assess if it is worth speeding up the matching process.
@@ -28,6 +28,16 @@ how the probability of cancellation starts increasing.
 
 <!-- Loading libraries  -->
 
+
+
+
+```r
+getwd()
+```
+
+```
+## [1] "/Users/kael/toptal/knowledge-repo"
+```
 
 
 
