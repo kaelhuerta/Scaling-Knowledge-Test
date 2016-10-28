@@ -1,0 +1,90 @@
+---
+title: Speed to send first candidate
+authors:
+- Kael Huerta
+tags:
+- jobs
+- matching
+- first-candidate
+- glm
+- splines
+created_at: 2016-10-26
+updated_at: 2016-10-26
+tldr: We compare the cancellation probability of a job in terms of the time it took our team to send the first candidate from the time the job was posted and the time it was claimed. We assess if it is worth speeding up the matching process.
+---
+
+**Contents**
+
+[TOC]
+
+### Main Result
+
+This research suggests that within the first week after the job was claimed,
+there is no gain in hurrying the first candidate sent. After a week we can see
+how the probability of cancellation starts increasing.
+
+<!-- Loading libraries  -->
+
+```{r, echo = F, message = F}
+## Required libraries
+library(arm)
+library(stringr)
+library(plyr)
+library(dplyr)
+library(dtplyr)
+library(data.table)
+library(lubridate)
+library(ggplot2)
+library(tidyr)
+library(bigrquery)
+library(gridExtra)
+library(splines)
+library(forcats)
+library(knitr)
+
+## Changing the ggplot default theme
+theme_set(theme_bw())
+
+## Colorblind-friendly palette
+pal <- c("#999999", "#E69F00", "#56B4E9", "#009E73", "#F0E442",
+  "#0072B2", "#D55E00", "#CC79A7", "#000000")
+```
+
+
+_NOTE: in graphs, optimize for being able to **stand alone**. As we aggregate and put things in presentations, we want to not have to recreate and add code to each plot to make it understandable without the entire post around it. When we compare this plot to other people's from other posts, will it be understandable without several paragraphs?_
+
+
+### Common Mistakes
+
+There are some requirements around how an R Markdown is developed to make the markdown render properly on the site. Here is a list of the ones that often lead to questions:
+
+ - There should be one plot display call in each R block. The add_knowledge script currently gets confused if there are multiple plots in a given block:
+
+```{r }
+  ### My Header (treated as R comment, as it is in a code block)
+  library(ggplot2)
+  test_data <- data.frame(y1 = rnorm(100), y2 = runif(100), x = 1:100)
+  ggplot(test_data, aes(y = y1, x = x)) + geom_line()
+  ggplot(test_data, aes(y = y2, x = x)) + geom_line()
+```
+
+ - Do not put markdown headers in R blocks. The knitr code will interpret the header #'s as R comments. This means that they will either be rendered properly as R comments within the block, or left out entirely if echo=FALSE
+
+### Appendix
+
+Testing a table.
+
+```{r, echo = F, message = F}
+library(knitr)
+library(data.table)
+library(dplyr)
+
+data.table(id = 1:10, random = sample(seq(0, 1, .2), 10, replace = T)) %>%
+  kable(caption = 'This is a random and useless table for testing',
+    format = 'html')
+```
+
+Here should be a table ^
+
+Put all the stuff here that is not necessary for supporting the points above. Good place for documentation of paths not pursued without distraction.
+
