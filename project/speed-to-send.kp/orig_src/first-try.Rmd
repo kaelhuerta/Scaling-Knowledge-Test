@@ -77,7 +77,7 @@ getwd()
 # actions <- tbl(pd, 'performed_actions') %>%
 #   filter(subject_type == 'Job') %>%
 #   as.data.table
-load('./dump.RData')
+load('dump.RData')
 ```
 
 ```{r models, echo = F, message = F}
