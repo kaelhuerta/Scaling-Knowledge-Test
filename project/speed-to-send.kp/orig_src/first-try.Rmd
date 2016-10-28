@@ -55,23 +55,24 @@ options('httr_oob_default' = T)
 ```
 
 ```{r data, echo = F}
-project <- 'toptal.com:api-project-726361118046'
-pd <- src_bigquery(project, 'analytics_warehouse_prototype')
-
-jobs <- tbl(pd, 'jobs_csv') %>%
-  as.data.table
-
-statuses <- tbl(pd, 'statuses') %>%
-  filter(statusable_type == 'Job') %>%
-  as.data.table
-
-funnel <- tbl(pd, 'job_matching_funnel_dataset') %>%
-  select(job_id, job_posted_at, job_claimed_at, first_candidate_sent_at) %>%
-  as.data.table
-
-actions <- tbl(pd, 'performed_actions') %>%
-  filter(subject_type == 'Job') %>%
-  as.data.table
+# project <- 'toptal.com:api-project-726361118046'
+# pd <- src_bigquery(project, 'analytics_warehouse_prototype')
+# 
+# jobs <- tbl(pd, 'jobs_csv') %>%
+#   as.data.table
+# 
+# statuses <- tbl(pd, 'statuses') %>%
+#   filter(statusable_type == 'Job') %>%
+#   as.data.table
+# 
+# funnel <- tbl(pd, 'job_matching_funnel_dataset') %>%
+#   select(job_id, job_posted_at, job_claimed_at, first_candidate_sent_at) %>%
+#   as.data.table
+# 
+# actions <- tbl(pd, 'performed_actions') %>%
+#   filter(subject_type == 'Job') %>%
+#   as.data.table
+load('./dump.RData')
 ```
 
 ```{r models, echo = F, message = F}
